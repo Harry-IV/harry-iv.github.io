@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Harry O'Hagin – Maker portfolio</title>
+<meta name="description" content="Maker portfolio: a 48 V power board for an eight-thruster ROV, a Raspberry Pi HAT, two ocean-profiling floats, and PCB medals.">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: dark;
+  --paper: #0D1316;
+  --soft: #162026;
+  --ink: #E4ECE9;
+  --muted: #8FA2A8;
+  --line: #26343A;
+  --mask: #7FD8B4;
+  --pool: #6BBCDC;
+  --brass: #D4A64A;
+  --brass-text: #E0B45A;
+  --ee: #1F7A4D;
+  --cs: #2B5CB0;
+  --me: #B83A2E;
+  --head: "Inter", "Helvetica Neue", "Segoe UI", system-ui, sans-serif;
+  --body: "Inter", "Helvetica Neue", "Segoe UI", system-ui, sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 1.05rem;
+  font-weight: 300;
+  line-height: 1.7;
+  -webkit-text-size-adjust: 100%;
+}
+img { display: block; max-width: 100%; height: auto; }
+a { color: var(--pool); text-underline-offset: 0.18em; text-decoration-thickness: 1px; }
+a:hover { color: var(--mask); }
+:focus-visible { outline: 3px solid var(--brass); outline-offset: 3px; border-radius: 2px; }
+h1:focus { outline: none; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.view[hidden] { display: none; }
+.view.enter { animation: viewfade 0.28s ease both; }
+@keyframes viewfade { from { opacity: 0; } to { opacity: 1; } }
+.wrap { max-width: 72rem; margin: 0 auto; padding: 0 1.25rem; }
+
+/* ---------- splash ---------- */
+.splash { min-height: 100vh; min-height: 100svh; display: grid; place-items: center; overflow-x: clip; padding: 2rem 1rem 5rem; }
+.stage { display: flex; flex-direction: column; align-items: center; }
+.seal {
+  --w: clamp(200px, 60vw, 340px);
+  --gap: clamp(12px, 3vw, 26px);
+  position: relative;
+  width: var(--w);
+  height: calc(var(--w) * 0.5);
+}
+.half {
+  position: absolute; top: 0; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--soft);
+  border: 1px solid var(--ink);
+  color: var(--ink);
+  text-decoration: none;
+  overflow: hidden;
+  pointer-events: none;
+  transition: transform 0.75s cubic-bezier(0.3, 1.25, 0.45, 1), border-width 0.25s ease, background-color 0.2s ease, color 0.2s ease;
+}
+.half.left { left: 0; width: calc(50% + 1px); border-right-width: 0; z-index: 1; }
+.half.right { right: 0; width: 50%; border-left-width: 0; z-index: 2; }
+.name {
+  position: absolute; top: 0; height: 100%;
+  width: var(--w);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--head); font-weight: 200;
+  font-size: clamp(1.7rem, 7vw, 2.6rem);
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  transition: opacity 0.25s ease;
+}
+.half.left .name { left: -1px; }
+.half.right .name { right: -1px; }
+.choice {
+  position: relative;
+  font-family: var(--head); font-weight: 200;
+  font-size: clamp(1.1rem, 3.6vw, 1.5rem);
+  letter-spacing: -0.01em;
+  opacity: 0;
+  transition: opacity 0.35s ease 0.2s;
+}
+.seal.intro:hover .half { background: #1E2C33; }
+.hit {
+  position: absolute; inset: 0; z-index: 3;
+  background: none; border: 0; padding: 0; cursor: pointer;
+}
+.hit:focus-visible { outline: 3px solid var(--brass); outline-offset: 8px; border-radius: 2px; }
+.seal.split .half.left { transform: translateX(calc(-1 * var(--gap))); border-right-width: 1px; }
+.seal.split .half.right { transform: translateX(var(--gap)); border-left-width: 1px; }
+.seal.split .name { opacity: 0; }
+.seal.split .choice { opacity: 1; }
+.seal.ready .hit { display: none; }
+.seal.ready .half { pointer-events: auto; }
+.seal.ready .half:hover { background: var(--ink); color: var(--paper); }
+.seal.instant, .seal.instant * { transition: none !important; }
+
+.arrow {
+  position: absolute; left: 50%; top: 50%;
+  width: 46px; height: 20px; margin: -10px 0 0 -23px;
+  z-index: 4; pointer-events: none; will-change: transform;
+}
+.arrow svg { display: block; width: 100%; height: 100%; overflow: visible; animation: nudge 1.3s ease-in-out infinite; }
+.seal.going .arrow svg { animation: none; }
+@keyframes nudge { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(14px); } }
+
+.who {
+  margin: 2.25rem 0 0; max-width: 24rem; text-align: center;
+  font-size: 1.05rem; line-height: 1.5; color: var(--muted);
+  transition: opacity 0.4s ease;
+}
+.who.away { opacity: 0; }
+
+/* ---------- inner pages ---------- */
+.topbar {
+  position: sticky; top: 0; z-index: 10;
+  background: color-mix(in srgb, var(--paper) 92%, transparent);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--line);
+}
+.topbar-inner { max-width: 72rem; margin: 0 auto; padding: 0.4rem 1.25rem; display: flex; align-items: center; gap: 0.75rem; }
+.home { display: inline-grid; place-items: center; width: 2.75rem; height: 2.75rem; border-radius: 6px; color: var(--ink); }
+.home:hover { background: var(--soft); color: var(--ink); }
+.home svg { width: 1.5rem; height: 1.5rem; }
+.crumb { font-family: var(--head); font-weight: 200; font-size: 0.95rem; color: var(--muted); text-decoration: none; }
+.crumb:hover { color: var(--ink); text-decoration: underline; }
+.page { padding: 2.5rem 1.25rem 5rem; }
+.page h1 {
+  font-family: var(--head); font-weight: 200;
+  font-size: clamp(2rem, 4.4vw, 3.2rem);
+  line-height: 1.06; letter-spacing: -0.03em;
+  margin: 0 0 0.5rem;
+}
+.tagline { margin: 0; font-size: 1.2rem; color: var(--muted);  max-width: 46rem; }
+
+/* discipline tags */
+.chips { display: inline-flex; gap: 0.3rem; flex-wrap: wrap; }
+.chip {
+  display: inline-grid; place-items: center;
+  min-width: 2rem; height: 2rem; padding: 0 0.3rem; border-radius: 4px;
+  font: 400 0.75rem/1 var(--head); letter-spacing: 0.02em;
+  color: #fff; text-decoration: none; cursor: inherit;
+}
+.chip.ee { background: var(--ee); }
+.chip.cs { background: var(--cs); }
+.chip.me { background: var(--me); }
+.meta { margin-top: 1rem; }
+.row .chips { flex-wrap: nowrap; flex-shrink: 0; }
+
+/* projects list */
+.plist-grid { margin-top: 2.25rem; }
+.plist { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; }
+.row {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: 1.1rem 1.25rem;
+  border: 1px solid var(--ink); border-radius: 2px;
+  background: var(--paper); color: var(--ink); text-decoration: none;
+  transition: background-color 0.15s ease, opacity 0.2s ease;
+}
+.row:hover { background: var(--soft); color: var(--ink); }
+.rname { display: block; font-family: var(--head); font-weight: 200; font-size: clamp(1.35rem, 3vw, 1.75rem); letter-spacing: -0.015em; line-height: 1.15; }
+.rdesc { display: block; margin-top: 0.2rem; font-size: 1rem; line-height: 1.4; color: var(--muted);  }
+/* project detail */
+.cols { display: grid; gap: 2.5rem; margin-top: 2.5rem; }
+.story { max-width: 36rem; }
+.story h2 { font-family: var(--head); font-weight: 200; font-size: 1.25rem; letter-spacing: -0.01em; margin: 2rem 0 0.5rem; }
+.story h2:first-child { margin-top: 0; }
+.story p { margin: 0 0 1rem; }
+.gallery { display: grid; gap: 1.25rem; align-content: start; }
+.gallery .pair { display: grid; gap: 1.25rem; grid-template-columns: 1fr 1fr; }
+figure { margin: 0; }
+figcaption { font-size: 0.9rem; line-height: 1.45; color: var(--muted); margin-top: 0.5rem; }
+.frame { border-radius: 6px; overflow: hidden; background: var(--soft); position: relative; }
+.frame img { width: 100%; }
+.frame.contain img { width: auto; max-width: 100%; max-height: 34rem; margin: 0 auto; }
+.frame.on-white { background: #fff; }
+.frame.on-black { background: #000; }
+.play { position: absolute; right: 0.6rem; bottom: 0.6rem; font: 400 0.85rem var(--head); color: var(--paper); background: var(--ink); border: 0; border-radius: 4px; padding: 0.4rem 0.7rem; cursor: pointer; }
+.broke { margin: 1.75rem 0; padding: 0.25rem 0 0.25rem 1.1rem; border-left: 4px solid var(--brass); }
+.broke dt { font-family: var(--head); font-weight: 200; font-size: 0.95rem; color: var(--brass-text); margin: 0.6rem 0 0.15rem; }
+.broke dt:first-child { margin-top: 0; }
+.broke dd { margin: 0 0 0.4rem; }
+.repos { font-family: var(--head); font-weight: 200; font-size: 1rem; margin-top: 1.5rem; }
+.repos a { margin-right: 1.25rem; white-space: nowrap; }
+.subhead { font-family: var(--head); font-weight: 200; font-size: clamp(1.5rem, 3vw, 2rem); letter-spacing: -0.015em; margin: 3.5rem 0 0; padding-top: 2.5rem; border-top: 1px dashed var(--line); }
+.subhead.first { margin-top: 2.5rem; padding-top: 0; border-top: 0; }
+.subhead + .cols { margin-top: 1.5rem; }
+.back { display: inline-block; margin-top: 3rem; font-family: var(--head); font-weight: 200; }
+
+/* about */
+.about-text { max-width: 36rem; margin-top: 1.75rem; }
+.about-text p { margin: 0 0 1rem; }
+.social-links { display: flex; align-items: center; gap: 0.85rem; margin-top: 1.4rem; }
+.social-link { display: inline-grid; place-items: center; width: 2.6rem; height: 2.6rem; color: var(--ink); border: 1px solid var(--line); border-radius: 6px; text-decoration: none; transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease; }
+.social-link:hover { background: var(--soft); border-color: var(--ink); color: var(--ink); }
+.social-link svg { width: 1.45rem; height: 1.45rem; }
+.sub { margin: 0; font-family: var(--head); font-weight: 200; font-size: 1.15rem; color: var(--muted); }
+.workshop h2 { font-family: var(--head); font-weight: 200; font-size: clamp(1.5rem, 3vw, 2rem); letter-spacing: -0.015em; margin: 4rem 0 0.5rem; padding-top: 2.5rem; border-top: 1px dashed var(--line); }
+.workshop-grid { display: grid; gap: 1.25rem; margin-top: 1.5rem; }
+.workshop-grid img { aspect-ratio: 4 / 3; object-fit: cover; width: 100%; }
+
+/* ordered lists in stories */
+.story ol { margin: 0 0 1.25rem; padding-left: 1.5rem; }
+.story ol li { margin: 0 0 0.65rem; padding-left: 0.3rem; }
+.story ol li::marker { color: var(--muted); }
+.story ol.changes { padding: 0.25rem 0 0.25rem 2.6rem; margin: 1.25rem 0; }
+.cols.sect { margin-top: 3.5rem; padding-top: 3rem; border-top: 1px dashed var(--line); }
+
+/* click-through viewer */
+.v-label { margin: 0 0 0.6rem; font-family: var(--head); font-weight: 300; font-size: 0.85rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.v-frame { position: relative; aspect-ratio: 4 / 3; background: var(--soft); border-radius: 6px; overflow: hidden; touch-action: pan-y; }
+.slide { position: absolute; inset: 0; margin: 0; }
+.slide[hidden] { display: none; }
+.slide.schematic-slide { background: #fff; }
+.slide img { display: block; width: 100%; height: 100%; object-fit: contain; -webkit-user-drag: none; user-select: none; }
+.v-btn {
+  position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
+  width: 2.75rem; height: 2.75rem; display: grid; place-items: center;
+  border-radius: 50%; border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--paper) 82%, transparent); color: var(--ink); cursor: pointer;
+}
+.v-btn:hover { background: var(--paper); border-color: var(--ink); }
+.v-btn.prev { left: 0.6rem; }
+.v-btn.next { right: 0.6rem; }
+.v-btn svg { width: 1.25rem; height: 1.25rem; }
+.v-caption { margin: 0.7rem 0 0; min-height: 2.9em; font-size: 0.9rem; line-height: 1.45; color: var(--muted); }
+.v-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 1rem; margin-top: 0.4rem; font-family: var(--head); font-weight: 300; font-size: 0.9rem; color: var(--muted); }
+.v-dots { display: flex; }
+.v-dot { position: relative; width: 1.5rem; height: 1.5rem; padding: 0; background: none; border: 0; cursor: pointer; }
+.v-dot::after { content: ""; position: absolute; left: 50%; top: 50%; width: 0.5rem; height: 0.5rem; margin: -0.25rem 0 0 -0.25rem; border-radius: 50%; background: var(--line); transition: background-color 0.15s ease; }
+.v-dot:hover::after { background: var(--muted); }
+.v-dot[aria-current="true"]::after { background: var(--ink); }
+.v-spacer { margin-left: auto; }
+.v-act { font: inherit; color: var(--ink); background: none; border: 0; padding: 0.25rem 0; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.2em; cursor: pointer; }
+.v-act:hover { color: var(--mask); }
+
+@media (min-width: 52rem) {
+  .cols { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 3.5rem; }
+  .p8-intro { grid-template-rows: auto auto; row-gap: 2rem; }
+  .p8-intro .p8-overview { grid-column: 1; grid-row: 1; }
+  .p8-intro .p8-design { grid-column: 1; grid-row: 2; }
+  .p8-intro .p8-gallery { grid-column: 2; grid-row: 2; }
+  .cols.flip { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); }
+  .cols.flip .gallery { order: -1; }
+  .workshop-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 40rem) { body { font-size: 1.05rem; } .page { padding-top: 1.75rem; } }
+@media (prefers-reduced-motion: reduce) {
+  .view.enter { animation: none; }
+  .arrow { display: none; }
+  .arrow svg { animation: none; }
+  .half, .name, .choice, .who { transition: none; }
+}
+</style>
+<noscript><style>.view[hidden] { display: block; } .splash { display: none !important; } .hit, .topbar { display: none; }</style></noscript>
+</head>
+<body>
+<main>
+
+<!-- ================= HOME / SPLASH ================= -->
+<section class="view splash" id="view-home">
+  <h1 class="sr">Harry O'Hagin, maker portfolio</h1>
+  <div class="stage">
+    <div class="seal intro" id="seal">
+      <a class="half left" id="halfL" href="#/projects" tabindex="-1" aria-hidden="true">
+        <span class="name" aria-hidden="true">harry-iv</span>
+        <span class="choice">projects</span>
+      </a>
+      <a class="half right" id="halfR" href="#/about" tabindex="-1" aria-hidden="true">
+        <span class="name" aria-hidden="true">harry-iv</span>
+        <span class="choice">bio</span>
+      </a>
+      <button class="hit" id="hit" type="button" aria-label="harry-iv: open portfolio"></button>
+      <div class="arrow" id="arrow" aria-hidden="true">
+        <svg viewBox="0 0 46 20"><path d="M3 10H41M31 3L41 10L31 17" fill="none" stroke="#D4A64A" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PROJECTS ================= -->
+<section class="view" id="view-projects" hidden>
+  <header class="topbar"><div class="topbar-inner">
+    <a class="home" href="#/" aria-label="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5L12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/></svg></a>
+  </div></header>
+  <div class="wrap page">
+    <h1>Projects</h1>
+    <div class="plist-grid">
+      <ul class="plist">
+        <li><a class="row" href="#/projects/power8board" data-tags="EE CS">
+          <span><span class="rname">Power8Board</span><span class="rdesc">Power board for an eight-thruster ROV</span></span>
+          <span class="chips"><abbr class="chip ee" title="Electrical engineering">EE</abbr><abbr class="chip cs" title="Computer science">CS</abbr></span>
+        </a></li>
+        <li><a class="row" href="#/projects/superhat" data-tags="EE CS">
+          <span><span class="rname">SuperHAT</span><span class="rdesc">Raspberry Pi 4/5 HAT for ROV applications</span></span>
+          <span class="chips"><abbr class="chip ee" title="Electrical engineering">EE</abbr><abbr class="chip cs" title="Computer science">CS</abbr></span>
+        </a></li>
+        <li><a class="row" href="#/projects/floats" data-tags="EE CS ME">
+          <span><span class="rname">Float</span><span class="rdesc">Underwater profiling data collection device</span></span>
+          <span class="chips"><abbr class="chip ee" title="Electrical engineering">EE</abbr><abbr class="chip cs" title="Computer science">CS</abbr><abbr class="chip me" title="Mechanical engineering">ME</abbr></span>
+        </a></li>
+        <li><a class="row" href="#/projects/medals" data-tags="EE">
+          <span><span class="rname">PCB Medals</span><span class="rdesc">Creative math competition medals</span></span>
+          <span class="chips"><abbr class="chip ee" title="Electrical engineering">EE</abbr></span>
+        </a></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ================= POWER8BOARD ================= -->
+<section class="view" id="view-power8board" hidden>
+  <header class="topbar"><div class="topbar-inner">
+    <a class="home" href="#/" aria-label="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5L12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/></svg></a>
+    <a class="crumb" href="#/projects">Projects</a>
+  </div></header>
+  <div class="wrap page">
+    <h1>Power8Board</h1>
+    <p class="tagline">Power board for an eight-thruster ROV</p>
+    <div class="meta"><span class="chips"><abbr class="chip ee" title="Electrical engineering">EE</abbr><abbr class="chip cs" title="Computer science">CS</abbr></span></div>
+
+    <!-- Overview + Design -->
+    <div class="cols p8-intro">
+      <div class="story p8-overview">
+        <h2>Overview</h2>
+        <p>Power8Board is a custom power distribution and sensing PCB intended for underwater robotics applications (e.g. ROVs / AUVs). I created this board from the ground up to support a change from six to eight thrusters for Hydra (Jesuit HS Robotics’ 25-26 ROV). Having eight thrusters was a project I led as CTO, which meant I not only was involved in the electrical side of things, but with mechanical and software integration. I believed this change was necessary, as an eight-thruster configuration would provide Hydra with 6 DoF (degrees of freedom), giving it unprecedented maneuverability and control.</p>
+      </div>
+
+      <div class="story p8-design">
+        <h2>Design</h2>
+        <p>The board converts 48 V DC down to 5 V and 12 V, distributes up to ~100 amps of power to eight ESCs which control/power the eight thrusters, and provides per-thruster current measurement and voltage rail monitoring (3.3, 5, 12, 48) over I²C.</p>
+        <p>To step down 48 V DC to 12 V, choosing the right DC-DC converters mattered since 12 V were used to power all the thrusters and ROV tools. To guide my decision-making, I drafted these primary requirements:</p>
+        <ol>
+          <li>Provide over 700 W. This is because pairing two would maximize our 48 V 30 A supply.</li>
+          <li>Have a minimum voltage requirement that is no greater than 42 V. Even though 48 V is our supply, there is a voltage drop across our tether.</li>
+          <li>Be in a quarter-brick footprint. This footprint would fit in our electronics enclosure while being large enough to perform optimally.</li>
+          <li>Have a mountable heat-sink. This is for heat dissipation as we can leverage the passive cooling of the surrounding water when thermally coupling the converters to the aluminum enclosure.</li>
+          <li>Have a double-pin layout. This is to prevent concentrated heat spots on the PCB and is what allowed me to use pin-receptacles on the board. I wanted to use pin-receptacles because it would allow me to swap the power converters.</li>
+        </ol>
+        <p>With these requirements, I chose to use these <a href="https://www.digikey.com/en/products/detail/murata-power-solutions-inc/MPQ860-12V72-L48NBMC/26005878">860 W 48-12 V Murata converters</a>. Conversion to 5 V used this <a href="https://www.digikey.com/en/products/detail/murata-power-solutions-inc/UWS-5-10-Q48N-C/3041704">Murata 48-5 V converter</a> that we had used with no issues in previous years.</p>
+        <p>While just routing the pins of these DC-DC converters would suffice, I wanted to go the extra mile and understand what was really happening when these electronics were under load. Specifically, I wanted real-time current readings from each of the eight thrusters, and voltage readings for all the power rails.</p>
+        <p>To achieve current monitoring, I chose to use eight <a href="https://www.ti.com/product/INA240">INA240 current sensors</a>, one for each thruster. The INA240 was an analog sensor that would amplify the voltage drop across a shunt and have its output routed to an ADC which would communicate with a Raspberry Pi via I²C. I opted for this mixed-signal design as the individual analog sensors would be easy to route, while the ADCs would provide the signal integrity and communication necessary for real-time monitoring with a Raspberry Pi. Voltage monitoring was accomplished through voltage dividers whose outputs would go to an ADC and then be appropriately scaled in software.</p>
+        <p>For a more in-depth technical breakdown, check out the files and README on <a href="https://github.com/Harry-IV/Power8Board">my github</a>.</p>
+      </div>
+      <div class="gallery p8-gallery">
+        <div class="pair">
+          <figure>
+            <div class="frame"><img width="3024" height="4032" src="img/p8-converters.jpg" alt="Two Murata DC-DC converters side by side on a dark wooden table: the large 48-12 V quarter-brick and the smaller 48-5 V converter." loading="lazy"></div>
+            <figcaption>The 860 W 48-12 V converter (left) and the 48-5 V converter (right).</figcaption>
+          </figure>
+          <figure>
+            <div class="frame"><img width="3024" height="4032" src="img/p8-esc.jpg" alt="Power8Board inside the ROV enclosure with ESC power modules plugged in on either side and wires routed beneath." loading="lazy"></div>
+            <figcaption>Power8Board in the ROV with a converter connected from underneath.</figcaption>
+          </figure>
+        </div>
+        <div class="viewer" data-viewer role="group" aria-roledescription="carousel" aria-label="Schematics and PCB layout">
+          <p class="v-label">Schematics and PCB layout</p>
+          <div class="v-frame">
+            <figure class="slide schematic-slide" data-caption="Top-level schematic: ESC connectors, converters, indicators, and the sensing blocks."><img width="1219" height="835" src="img/p8-sch-top.svg" alt="Top-level KiCad schematic of Power8Board with boxed sections for ESC power connectors, LED indicators, power converters, ADCs, output filtering, the 48 V input, the 5 and 12 V output, and the I²C connector." loading="lazy"></figure>
+            <figure class="slide schematic-slide" data-caption="Current sensing sheet: eight INA240 channels routed to two ADCs." hidden><img width="1279" height="910" src="img/p8-sch-current.svg" alt="KiCad sheet with eight INA240 current sensor blocks in two groups of four, each group feeding an ADS1015 ADC, plus ferrite bead filtering for the analog supply." loading="lazy"></figure>
+            <figure class="slide schematic-slide" data-caption="One INA240 channel: the shunt resistor and the amplifier." hidden><img width="1340" height="529" src="img/p8-sch-ina240.svg" alt="Schematic of a single INA240 current sensor with its 0.0033 ohm shunt resistor, and a ferrite bead and capacitor filtering the 3.3 V analog supply." loading="lazy"></figure>
+            <figure class="slide schematic-slide" data-caption="Voltage sensing: dividers for the 48, 12, 5, and 3.3 V rails, with the scalar values used in software." hidden><img width="1350" height="1140" src="img/p8-sch-voltage.svg" alt="Schematic of four resistor voltage dividers for the 48, 12, 5, and 3.3 V rails with a note listing the scalar values, plus analog supply filtering and the ADC." loading="lazy"></figure>
+            <figure class="slide" data-caption="The 2D PCB layout in KiCad." hidden><img width="1485" height="1468" src="img/p8-pcb-2d.png" alt="The Power8Board PCB layout in KiCad, with red copper, gold pads, and the converters and ESC connectors arranged symmetrically." loading="lazy"></figure>
+            <button class="v-btn prev" type="button" aria-label="Previous image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+            <button class="v-btn next" type="button" aria-label="Next image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+          </div>
+          <p class="v-caption" aria-live="polite"></p>
+          <div class="v-bar">
+            <span class="v-count"></span><span class="v-dots"></span>
+            <a class="v-act v-open v-spacer" target="_blank" rel="noopener">Open original</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Build -->
+    <div class="cols sect">
+      <div class="story">
+        <h2>Build</h2>
+        <p>Using the gerber files generated from my design in KiCad, I ordered the PCB from JLCPCB. When designing the board, I sourced all the components from Digikey and TME. For organization, I inputted manufacturer, datasheet, part #, price, and order link information for every component to generate an interactive BOM using a KiCad 3rd party extension. This made ordering components seamless.</p>
+        <p>I also used the interactive BOM for manufacturing, as highlighting any component in the rows on the left, would show where it is on the PCB (red boxes on the right). This saved time, but also made sure I didn’t place components in the wrong spot (especially for those ceramic capacitors that look identical).</p>
+        <p>For soldering the SMD components, I used a stainless steel stencil to apply solder paste and used a hot plate. All the SMD components are on one side which makes soldering really easy with the hot plate. After this, I soldered all the through-hole components with my soldering iron.</p>
+      </div>
+      <div class="gallery">
+        <div class="viewer" data-viewer role="group" aria-roledescription="carousel" aria-label="Build photos">
+          <p class="v-label">Build</p>
+          <div class="v-frame">
+            <figure class="slide" data-caption="The interactive BOM: select a row on the left and its position lights up on the board."><img width="2559" height="1220" src="img/p8-bom.png" alt="The interactive BOM web page for Power8Board V1, with a parts table on the left and a dark board view on the right with highlighted parts." loading="lazy"></figure>
+            <figure class="slide" data-caption="The bare board before any parts are soldered on." hidden><img width="3024" height="4032" src="img/p8-bare-board.jpg" alt="The bare green Power8Board PCB on a blue mat, next to a black stencil." loading="lazy"></figure>
+            <figure class="slide" data-caption="Soldering SMD parts on a hot plate." hidden><img width="4032" height="3024" src="img/p8-smd.jpg" alt="Power8Board with the surface-mount parts soldered, sitting on a white enclosure." loading="lazy"></figure>
+            <figure class="slide" data-caption="Fully assembled, with the through-hole components added." hidden><img width="4032" height="3024" src="img/p8-assembled.jpg" alt="The fully assembled Power8Board with yellow and orange XT connectors on a blue mat." loading="lazy"></figure>
+            <button class="v-btn prev" type="button" aria-label="Previous image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+            <button class="v-btn next" type="button" aria-label="Next image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+          </div>
+          <p class="v-caption" aria-live="polite"></p>
+          <div class="v-bar">
+            <span class="v-count"></span><span class="v-dots"></span>
+            <a class="v-act v-open v-spacer" target="_blank" rel="noopener">Open original</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Test -->
+    <div class="cols sect">
+      <div class="story">
+        <h2>Test</h2>
+        <p>Testing was stressful, but was done methodically to identify any potential issues with the board. I first plugged in the power converters and got the proper voltage readings out of them. I then plugged in one ESC which was connected to a thruster testbench. With a servo controller that fed a signal to the ESC, the thruster ran successfully, pulling 180 W. I then scaled up and tested with multiple thrusters. After this, I tested the current and voltage sensing. I was quite surprised that version 1 of my board worked so well. Still, there were a few changes I wanted to make:</p>
+        <ol class="changes">
+          <li>Changing the enabling resistors for the converters from 10k Ω to 100 Ω since the converters weren’t turning on at 10k Ω.</li>
+          <li>Splitting the 12 V plane into left and right banks since I found current sharing between the converters was unnecessary.</li>
+        </ol>
+        <p>These changes were applied to version 2 of the board.</p>
+      </div>
+      <div class="gallery">
+        <figure data-gif="media/thruster-monitor.gif">
+          <div class="frame">
+            <img width="1780" height="964" src="media/stills/thruster-monitor.png" alt="Thruster monitor plots: the 48 V bus, the left and right 12 V banks, and 3.3 V as flat lines, and eight thruster currents rising and falling over about 18 seconds." loading="lazy">
+            <button class="play" type="button">Play animation (20 MB)</button>
+          </div>
+          <figcaption>Live monitor during a thruster test: the 48 V bus, both 12 V banks, 3.3 V, and the eight thruster currents.</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <a class="back" href="#/projects">Back to projects</a>
+  </div>
+</section>
+
+<!-- ================= SUPERHAT ================= -->
+<section class="view" id="view-superhat" hidden>
+  <header class="topbar"><div class="topbar-inner">
+    <a class="home" href="#/" aria-label="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5L12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/></svg></a>
+    <a class="crumb" href="#/projects">Projects</a>
+  </div></header>
+  <div class="wrap page">
+    <h1>SuperHAT</h1>
+    <p class="tagline">Raspberry Pi 4/5 HAT for ROV applications</p>
+    <div class="meta"><span class="chips"><abbr class="chip ee" title="Electrical engineering">EE</abbr><abbr class="chip cs" title="Computer science">CS</abbr></span></div>
+
+    <div class="cols flip">
+      <div class="story">
+        <h2>Overview</h2>
+        <p>SuperHAT is a HAT (hardware attached on top) that expands the capabilities of the Raspberry Pi 4/5. In my junior year, I designed this PCB from the ground up since the Raspberry Pi in our ROV (<a href="https://www.jesuitrobotics.com/">Jesuit Robotics</a>) needed to control 5-12 V tools, interface with sensors and controllers via I²C, and drive a variety of motors. This was my first ever “major” PCB project, so I learned a lot from this experience.</p>
+      </div>
+      <div class="gallery"><figure><div class="frame contain"><img src="img/superhat/magnetic-coupling.JPG" alt="ROV hardware with the magnetically-coupled motor driven by SuperHAT visible on the left." loading="lazy"></div><figcaption>SuperHAT is used to drive the magnetically-coupled motor on the left.</figcaption></figure></div>
+    </div>
+
+    <div class="cols sect">
+      <div class="story">
+        <h2>Design</h2>
+        <p>SuperHAT’s key features are:</p>
+        <ol><li>Four N-Type MOSFETs for GPIO switching 5 or 12 V tools</li><li>One dual H-bridge motor driver</li><li>One stepper motor driver</li><li>Two 5 V servo connectors</li><li>Overvoltage protection</li><li>Voltage &amp; current sensing</li></ol>
+        <p>To route all the traces needed for these features while keeping costs reasonable, I opted for a 4-layer stackup (SIG-PWR-GND-SIG).</p>
+        <p>Over the past two years (24-25’ &amp; 25-26’), SuperHAT’s MOSFETs have powered tools such as LEDs for morse code signaling, bilge pumps to safely collect fish species, peristaltic pumps to retrieve saline fluid, and more. The I²C connectors have been used to interface with depth sensors, thruster control boards, IMUs, etc. SuperHAT has also driven a servo motor that adjusts the angle of a camera and a magnetically-coupled motor that can turn valves in either direction.</p>
+        <p>More specific technical details on how these features were implemented can be found on my github.</p>
+        <p class="repos"><a href="https://github.com/Harry-IV/SuperHAT">SuperHAT on GitHub</a></p>
+      </div>
+      <div class="gallery">        <div class="viewer" data-viewer role="group" aria-roledescription="carousel" aria-label="SuperHAT schematic and PCB layout">
+          <p class="v-label">Schematic and PCB layout</p>
+          <div class="v-frame">
+            <figure class="slide schematic-slide" data-caption="SuperHAT V2 schematic."><img src="img/superhat/schematic-v2.svg" alt="SuperHAT V2 KiCad schematic." loading="lazy"></figure>
+            <figure class="slide" data-caption="SuperHAT V2 PCB layout in KiCad." hidden><img src="img/superhat/kicad-layout.png" alt="SuperHAT V2 PCB layout in KiCad." loading="lazy"></figure>
+            <button class="v-btn prev" type="button" aria-label="Previous image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+            <button class="v-btn next" type="button" aria-label="Next image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+          </div>
+          <p class="v-caption" aria-live="polite"></p>
+          <div class="v-bar"><span class="v-count"></span><span class="v-dots"></span><a class="v-act v-open v-spacer" target="_blank" rel="noopener">Open original</a></div>
+        </div></div>
+    </div>
+
+    <div class="cols sect flip">
+      <div class="story"><h2>Build</h2><p>The manufacturing process for SuperHAT is identical to Power8Board. I created an interactive BOM that aids me in ordering and manufacturing SuperHAT. Soldering for SMD components is done via a stencil and hot plate and the through hole components are done by hand. All of the sourcing and manufacturing was done by myself.</p></div>
+      <div class="gallery">        <div class="viewer" data-viewer role="group" aria-roledescription="carousel" aria-label="SuperHAT build photos">
+          <p class="v-label">Build progression</p>
+          <div class="v-frame">
+            <figure class="slide" data-caption="Bare SuperHAT V2 PCB."><img src="img/superhat/bare.jpg" alt="Bare SuperHAT V2 PCB." loading="lazy"></figure>
+            <figure class="slide" data-caption="Soldering SMD components on a hot plate." hidden><img src="img/superhat/smd.jpg" alt="SuperHAT V2 with surface-mount components soldered." loading="lazy"></figure>
+            <figure class="slide" data-caption="Fully assembled SuperHAT V2." hidden><img src="img/superhat/assembled.jpg" alt="Fully assembled SuperHAT V2 PCB." loading="lazy"></figure>
+            <button class="v-btn prev" type="button" aria-label="Previous image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+            <button class="v-btn next" type="button" aria-label="Next image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+          </div>
+          <p class="v-caption" aria-live="polite"></p>
+          <div class="v-bar"><span class="v-count"></span><span class="v-dots"></span><a class="v-act v-open v-spacer" target="_blank" rel="noopener">Open original</a></div>
+        </div></div>
+    </div>
+
+    <div class="cols sect">
+      <div class="story"><h2>Test</h2><p>To test SuperHAT with a Raspberry Pi 4/5, I wrote <a href="https://github.com/Harry-IV/superhat_test">code</a> in Python that runs each of its functions. Some of the libraries for testing sensors were provided by Adafruit and Blue Robotics. SuperHAT V1 had some issues, most notably a faulty pull-down setup at the gate of the MOSFETs. This was remedied in version 2 of the board. For version 3, I mentored an underclassman by walking him through the circuits and writing guidelines for the revisions, and he designed the board himself.</p></div>
+      <div class="gallery"><figure><div class="frame contain"><img src="img/superhat/v3.png" alt="SuperHAT version 3 PCB." loading="lazy"></div><figcaption>SuperHAT V3.</figcaption></figure></div>
+    </div>
+    <a class="back" href="#/projects">Back to projects</a>
+  </div>
+</section>
+
+<!-- ================= FLOATS ================= -->
+<section class="view" id="view-floats" hidden>
+  <header class="topbar"><div class="topbar-inner"><a class="home" href="#/" aria-label="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5L12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/></svg></a><a class="crumb" href="#/projects">Projects</a></div></header>
+  <div class="wrap page">
+    <h1>Float</h1><p class="tagline">Underwater profiling data collection device</p>
+    <div class="meta"><span class="chips"><abbr class="chip ee" title="Electrical engineering">EE</abbr><abbr class="chip cs" title="Computer science">CS</abbr><abbr class="chip me" title="Mechanical engineering">ME</abbr></span></div>
+    <div class="about-text"><h2>Float Overview</h2><p>A float is a vertically profiling device that changes its buoyancy to ascend and descend the water depths. While profiling, it reads from its sensors to collect data. Floats in the real world go thousands of feet deep to retrieve vital oceanographic data such as carbon dioxide levels, salinity, and temperature. This data helps scientists/researchers better understand the effects of climate change in our ocean ecosystems.</p></div>
+
+    <h2 class="subhead first">P.O.D, 2023-24</h2>
+    <div class="cols"><div class="story"><h2>Design &amp; Build</h2>
+      <p>In my sophomore year, I wanted to redesign the float from the ground up since the prior year’s version had many issues caused by its syringe-based design. To fix these issues, I came up with the idea of using a peristaltic pump. To test this idea, I built a prototype and discovered it was twice as efficient and would be way more serviceable. This is because there is much less friction with a peristaltic pump vs. an O-ring rubbing on a tube. Additionally, a peristaltic only needs a couple of tubes and a bladder. This is far easier to design and service than a syringe which requires a precise seal, lead screw, and motor.</p>
+      <p>Mechanically, I designed P.O.D in CAD as three sections. The flanges were machined from Type 2 PVC on a CNC mill from CAM I programmed in Fusion 360, and the polycarbonate tubes were cut on a bandsaw. I epoxied the flanges to the tubes and face-sealed the housings with 2.62 mm O-rings. Inside, an RP2040 reads a Blue Robotics depth sensor, drives the pump, and sends data to the mission station over LoRa once the float surfaces.</p>
+      <p>I designed and manufactured the prototype electronics using a protoboard. I used a buck converter that converted 9V to 5V to power the RP2040. A COTS dual H-bridge motor driver was used to power the pump and the depth sensor was connected via I²C. Later, these prototype electronics got condensed into a PCB with the help of an electronics member.</p>
+      <p>To profile, I used the depth sensor instead of relying on fixed time increments to drive the pump. Here’s the logic: the pump would suck in water to sink and once it was about halfway down, it would shut off and coast. Once it is near the bottom, the pump reverses to push out water, making it float and halfway up, it would shut off and coast. When it reaches the surface, it would send the depth data it collected over the profile. Using this profiling algorithm not only saved battery life, but also prevented drift. I wrote this <a href="https://github.com/JHSRobo/Float/tree/main">code</a> in Arduino C.</p>
+      <p>The first ever PCB I made was a mission station controller HAT (hardware attached on top) for the float. One button is to manually pump out water, one is for manually pumping in water, and one initiates a profile.</p>
+    </div><div class="gallery">        <div class="viewer" data-viewer role="group" aria-roledescription="carousel" aria-label="P.O.D design and electronics">
+          <p class="v-label">P.O.D design and electronics</p>
+          <div class="v-frame">
+            <figure class="slide" data-caption="Early peristaltic-pump prototype in the pool."><img src="img/float/prototype.png" alt="Early float prototype in the pool." loading="lazy"></figure>
+            <figure class="slide" data-caption="P.O.D CAD model." hidden><img src="img/float/pod-cad.png" alt="CAD model of P.O.D." loading="lazy"></figure>
+            <figure class="slide" data-caption="P.O.D housings and flanges during assembly." hidden><img src="img/float/go-pod-compartments.jpg" alt="P.O.D polycarbonate housings and machined flanges laid out during assembly." loading="lazy"></figure>
+            <figure class="slide" data-caption="P.O.D internals and pump assembly." hidden><img src="img/float/podinternals.jpg" alt="P.O.D internal components and peristaltic pump." loading="lazy"></figure>
+            <figure class="slide" data-caption="Mission station controller PCB." hidden><img src="img/float/missioncontrollerpcb-rotated.png" alt="Mission station controller PCB with three colored buttons, rotated for easier viewing." loading="lazy"></figure>
+            <figure class="slide" data-caption="Mission station controller enclosure." hidden><img src="img/float/missioncontrollerpcb2.jpg" alt="Orange mission station controller enclosure with three buttons." loading="lazy"></figure>
+            <figure class="slide" data-caption="Mission station controller with 915 Mhz antenna." hidden><img src="img/float/missioncontrollerpcb3.jpg" alt="Mission station controller and radio hardware." loading="lazy"></figure>
+            <button class="v-btn prev" type="button" aria-label="Previous image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+            <button class="v-btn next" type="button" aria-label="Next image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+          </div>
+          <p class="v-caption" aria-live="polite"></p>
+          <div class="v-bar"><span class="v-count"></span><span class="v-dots"></span><a class="v-act v-open v-spacer" target="_blank" rel="noopener">Open original</a></div>
+        </div></div></div>
+
+    <div class="cols sect flip"><div class="story"><h2>Testing</h2><p>After getting all the components of the float together, I began profiling the float to see if there were any more issues. Everything was going smoothly, and it completed over 50 profiles. One evening, a week before it was going to get shipped, the float would not come back up. Suspecting something wrong, I brought it up with a long stick 13 ft from the pool and saw the pump continuing to inflate the very full bag. Ultimately, before I was able to shut it down, the pressure inside the sealed housings blew off one of the epoxy seals. After removing the old epoxy with the lathe and a knife, I was able to re-epoxy the flange to the polycarbonate tube just before it shipped off. It won full points at the MATE ROV World Championship.</p></div>
+      <div class="gallery"><figure data-gif="media/float/pod-profile.webp"><div class="frame"><img src="img/float/pod-profile-still.png" alt="P.O.D profiling in a swimming pool." loading="lazy"><button class="play" type="button">Play animation (full resolution)</button></div><figcaption>P.O.D profiling in the pool.</figcaption></figure>        <div class="viewer" data-viewer role="group" aria-roledescription="carousel" aria-label="P.O.D testing photos">
+          <p class="v-label">P.O.D testing</p>
+          <div class="v-frame">
+            <figure class="slide" data-caption="P.O.D at the bottom of the pool."><img src="img/float/podatbottom.png" alt="P.O.D at the bottom of the pool." loading="lazy"></figure>
+            <figure class="slide" data-caption="P.O.D reaching the surface." hidden><img src="img/float/podreachingsurface.JPG" alt="P.O.D reaching the pool surface." loading="lazy"></figure>
+            <figure class="slide" data-caption="Depth plot from a P.O.D profile." hidden><img src="img/float/podprofile.jpg" alt="Depth plot from a P.O.D profile." loading="lazy"></figure>
+            <button class="v-btn prev" type="button" aria-label="Previous image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+            <button class="v-btn next" type="button" aria-label="Next image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+          </div>
+          <p class="v-caption" aria-live="polite"></p>
+          <div class="v-bar"><span class="v-count"></span><span class="v-dots"></span><a class="v-act v-open v-spacer" target="_blank" rel="noopener">Open original</a></div>
+        </div></div></div>
+
+    <h2 class="subhead">GO-POD, 2024-25</h2>
+    <div class="cols"><div class="story"><h2>Design &amp; Build</h2>
+      <p>Junior year, the objective changed: instead of profiling all the way to the bottom, the floats needed to hold at 2.5 meters for 45 seconds. While I could’ve reused last year’s float and just modified the profiling logic by adding a control algorithm, I wanted to improve on the whole design.</p>
+      <p>For the mechanical design, I worked with a mechanical member of the Jesuit Robotics team. We collaborated over whiteboard discussions on the internal layout of the components (pump, electronics, bag, batteries) and housing design. These collaborative and creative brainstorming sessions are my favorite part of the making process.</p>
+      <p>Compared to sophomore year’s float which had three housings, we decided to migrate to a single Blue Robotics housing. This was because the internals could be accessed without removing screws. This greatly reduced servicing time. We could not manufacture this type of housing in our team’s shop, due to not having the machines that could hold the tolerances required for a reliable seal. Despite this, the end caps were CNC’d out of smoked polycarbonate. Improvements in the internal layout were placing the electronics at the top to protect them in case of a pump or tube leak. Another advantage of placing the electronics up top is that it is closer to the depth sensor and antenna, requiring shorter cable lengths, improving signal integrity.</p>
+      <p>Unlike the previous year, I designed all the electronics by myself. There are two custom boards inside GO-POD. One serves as a daughter board for the ESP32, giving it the functionality to drive the pump, read the depth sensor, and drive an indicating light. The other serves as a power board where eight 9V rechargeable Ni-MH batteries are connected in parallel. I decided to switch to an ESP32 from an RP2040 as LoRa’s range proved unnecessary and sending data over Wifi proved easier.</p>
+      <p>To begin profiling, the control station sends a command through WiFi to a web server on the ESP32. When the ESP32 receives the command, it begins profiling to the targeted depth of 2.5 m. To maintain this depth, a PID program is used to determine the pump’s direction. When GO-POD resurfaces, the control station reconnects with the ESP32’s web server, retrieves the collected depth data, and generates a graph for analysis. The source code can be found <a href="https://github.com/Harry-IV/Float25">here</a> on my github.</p>
+    </div><div class="gallery">        <div class="viewer" data-viewer role="group" aria-roledescription="carousel" aria-label="GO-POD design and electronics">
+          <p class="v-label">GO-POD design and electronics</p>
+          <div class="v-frame">
+            <figure class="slide schematic-slide" data-caption="Annotated GO-POD assembly."><img src="img/float/go-pod-annotated.png" alt="Annotated GO-POD assembly showing the antenna, depth sensor, ESP32 daughter board, inlet tube, peristaltic pump, water bag, power board, and ballast." loading="lazy"></figure>
+            <figure class="slide" data-caption="A smoked-polycarbonate end cap that I CNC-machined." hidden><img src="img/float/endcap.jpg" alt="GO-POD machined end cap." loading="lazy"></figure>
+            <figure class="slide" data-caption="ESP32 installed on the GO-POD daughter board." hidden><img src="img/float/esp32-on-daughterboard-gopod.JPG" alt="ESP32 mounted on the GO-POD daughter board." loading="lazy"></figure>
+            <figure class="slide" data-caption="Eight 9V rechargeable Ni-MH batteries used by GO-POD." hidden><img src="img/float/go-pod-batteries.png" alt="Eight 9V batteries arranged for GO-POD." loading="lazy"></figure>
+            <figure class="slide" data-caption="GO-POD power-board assembly." hidden><img src="img/float/go-pod-powerboard-pcb.png" alt="GO-POD circular power-board assembly." loading="lazy"></figure>
+            <button class="v-btn prev" type="button" aria-label="Previous image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+            <button class="v-btn next" type="button" aria-label="Next image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+          </div>
+          <p class="v-caption" aria-live="polite"></p>
+          <div class="v-bar"><span class="v-count"></span><span class="v-dots"></span><a class="v-act v-open v-spacer" target="_blank" rel="noopener">Open original</a></div>
+        </div>        <div class="viewer" data-viewer role="group" aria-roledescription="carousel" aria-label="GO-POD PCB designs">
+          <p class="v-label">GO-POD PCB designs</p>
+          <div class="v-frame">
+            <figure class="slide schematic-slide" data-caption="Glass Squid V3 schematic, the ESP32 daughter board used in GO-POD."><img src="img/float/glass-squid-v3.svg" alt="Glass Squid V3 schematic for the GO-POD ESP32 daughter board." loading="lazy"></figure>
+            <figure class="slide" data-caption="2D PCB layout of the GO-POD ESP32 daughter board." hidden><img src="img/float/go-pod-daughterboard.png" alt="2D PCB layout of the GO-POD ESP32 daughter board." loading="lazy"></figure>
+            <figure class="slide schematic-slide" data-caption="GO-POD power board schematic." hidden><img src="img/float/float-power-board-v1.svg" alt="Schematic of the GO-POD power board." loading="lazy"></figure>
+            <figure class="slide" data-caption="2D PCB layout of the GO-POD power board." hidden><img src="img/float/go-pod-powerboard.png" alt="2D PCB layout of the GO-POD power board." loading="lazy"></figure>
+            <button class="v-btn prev" type="button" aria-label="Previous image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+            <button class="v-btn next" type="button" aria-label="Next image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+          </div>
+          <p class="v-caption" aria-live="polite"></p>
+          <div class="v-bar"><span class="v-count"></span><span class="v-dots"></span><a class="v-act v-open v-spacer" target="_blank" rel="noopener">Open original</a></div>
+        </div></div></div>
+
+    <div class="cols sect flip"><div class="story"><h2>Testing</h2><p>Achieved roughly 100 profiles of testing before competition.</p></div><div class="gallery"><figure data-gif="media/float/gopod-profile.webp"><div class="frame"><img src="img/float/gopod-profile-still.png" alt="GO-POD profiling in a swimming pool." loading="lazy"><button class="play" type="button">Play animation (full resolution)</button></div><figcaption>GO-POD profile test.</figcaption></figure>        <div class="viewer" data-viewer role="group" aria-roledescription="carousel" aria-label="GO-POD testing and profile results">
+          <p class="v-label">GO-POD testing</p>
+          <div class="v-frame">
+            <figure class="slide" data-caption="GO-POD profiling in the pool."><img src="img/float/go-pod-profiling.png" alt="GO-POD profiling in the pool." loading="lazy"></figure>
+            <figure class="slide" data-caption="GO-POD depth data and profile graph." hidden><img src="img/float/go-pod-profile.png" alt="GO-POD profile graph and data on a computer." loading="lazy"></figure>
+            <button class="v-btn prev" type="button" aria-label="Previous image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+            <button class="v-btn next" type="button" aria-label="Next image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+          </div>
+          <p class="v-caption" aria-live="polite"></p>
+          <div class="v-bar"><span class="v-count"></span><span class="v-dots"></span><a class="v-act v-open v-spacer" target="_blank" rel="noopener">Open original</a></div>
+        </div></div></div>
+    <a class="back" href="#/projects">Back to projects</a>
+  </div>
+</section>
+
+<!-- ================= MEDALS ================= -->
+<section class="view" id="view-medals" hidden>
+  <header class="topbar"><div class="topbar-inner"><a class="home" href="#/" aria-label="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5L12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/></svg></a><a class="crumb" href="#/projects">Projects</a></div></header>
+  <div class="wrap page"><h1>PCB Medals</h1><p class="tagline">Creative math competition medals</p><div class="meta"><span class="chips"><abbr class="chip ee" title="Electrical engineering">EE</abbr></span></div>
+    <div class="cols"><div class="story"><p>Since my school was hosting the January Mathletes competition in 2025, I thought it would be special if the trophies weren’t in their traditional form (those plasticky ones that always break). Furthermore, a medal that everyone in the top 3 finishing teams could take home would be more memorable. I designed these PCB medals with a creative math twist. 1st place corresponds to phi, 2nd place to e, and 3rd place to pi. Mathematically, the floors of each of these special numbers equate to 1, 2, 3, respectively. White LEDs are used to illuminate these numbers on the front. On the back, a 2032 coin cell battery paired with an on/ off button (not momentary) can switch the LEDs. I made 45 of these in total, 15 for each top 3 finishish team.</p></div>
+      <div class="gallery"><figure><div class="frame"><img src="media/medals/pcb-medal.gif" alt="PCB medal shown from the front and back." loading="lazy"></div><figcaption>PCB medal, front and back.</figcaption></figure>        <div class="viewer" data-viewer role="group" aria-roledescription="carousel" aria-label="Finished PCB medals">
+          <p class="v-label">Finished medals</p>
+          <div class="v-frame">
+            <figure class="slide" data-caption="Front of a finished PCB medal."><img src="img/medals/frontside.JPG" alt="Front of a finished green PCB medal." loading="lazy"></figure>
+            <figure class="slide" data-caption="Back of a finished PCB medal with the coin cell holder and switch." hidden><img src="img/medals/backside.JPG" alt="Back of a finished PCB medal." loading="lazy"></figure>
+            <figure class="slide" data-caption="The finished set of PCB medals." hidden><img src="img/medals/pcbs.JPG" alt="Multiple finished PCB medals." loading="lazy"></figure>
+            <button class="v-btn prev" type="button" aria-label="Previous image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+            <button class="v-btn next" type="button" aria-label="Next image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+          </div>
+          <p class="v-caption" aria-live="polite"></p>
+          <div class="v-bar"><span class="v-count"></span><span class="v-dots"></span><a class="v-act v-open v-spacer" target="_blank" rel="noopener">Open original</a></div>
+        </div>        <div class="viewer" data-viewer role="group" aria-roledescription="carousel" aria-label="PCB medal layouts">
+          <p class="v-label">PCB layouts</p>
+          <div class="v-frame">
+            <figure class="slide" data-caption="First-place φ PCB layout."><img src="img/medals/phi-kicad.png" alt="KiCad layout for the phi first-place PCB medal." loading="lazy"></figure>
+            <figure class="slide" data-caption="Second-place e PCB layout." hidden><img src="img/medals/e-kicad.png" alt="KiCad layout for the e second-place PCB medal." loading="lazy"></figure>
+            <figure class="slide" data-caption="Third-place π PCB layout." hidden><img src="img/medals/pi-kicad.png" alt="KiCad layout for the pi third-place PCB medal." loading="lazy"></figure>
+            <button class="v-btn prev" type="button" aria-label="Previous image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+            <button class="v-btn next" type="button" aria-label="Next image"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+          </div>
+          <p class="v-caption" aria-live="polite"></p>
+          <div class="v-bar"><span class="v-count"></span><span class="v-dots"></span><a class="v-act v-open v-spacer" target="_blank" rel="noopener">Open original</a></div>
+        </div></div>
+    </div><a class="back" href="#/projects">Back to projects</a></div>
+</section>
+
+<!-- ================= ABOUT ================= -->
+<section class="view" id="view-about" hidden>
+  <header class="topbar"><div class="topbar-inner"><a class="home" href="#/" aria-label="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5L12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/></svg></a></div></header>
+  <div class="wrap page"><h1>Harry O'Hagin</h1><p class="sub">MIT '30</p><div class="about-text"><p>I’m a melting pot of interests. It all started with my interest in cars, which then sprouted into my passion for engineering and beyond. Currently, I’m diving into MRIs, making rockets, learning about quantum computers, fusion, and semiconductor fabrication.</p><div class="social-links" aria-label="Contact links"><a class="social-link" href="https://github.com/Harry-IV" target="_blank" rel="noopener" aria-label="GitHub profile" title="GitHub"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 .7a11.3 11.3 0 0 0-3.57 22.02c.56.1.77-.24.77-.54v-2.1c-3.13.68-3.79-1.33-3.79-1.33-.51-1.3-1.25-1.65-1.25-1.65-1.02-.7.08-.69.08-.69 1.13.08 1.72 1.16 1.72 1.16 1 1.72 2.63 1.22 3.27.93.1-.73.39-1.22.71-1.5-2.5-.29-5.13-1.25-5.13-5.57 0-1.23.44-2.24 1.16-3.03-.12-.29-.5-1.44.11-3 0 0 .95-.3 3.1 1.16a10.73 10.73 0 0 1 5.64 0C16.97 5.1 17.92 5.4 17.92 5.4c.61 1.56.23 2.71.11 3 .72.79 1.16 1.8 1.16 3.03 0 4.33-2.64 5.28-5.15 5.56.4.35.76 1.04.76 2.1v3.11c0 .3.2.65.78.54A11.3 11.3 0 0 0 12 .7Z"/></svg></a><a class="social-link" href="mailto:harry.ohagin@outlook.com" aria-label="Email Harry O'Hagin" title="Email"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg></a></div></div></div>
+</section>
+
+</main>
+
+
+
+
+<script>
+(function () {
+  'use strict';
+
+  var reduceQuery = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
+  var seal = document.getElementById('seal');
+  var arrow = document.getElementById('arrow');
+  var hit = document.getElementById('hit');
+  var halfL = document.getElementById('halfL');
+  var halfR = document.getElementById('halfR');
+  var stage = seal.parentNode;
+  var introDone = false;
+  var animating = false;
+
+  /* ---------- routing: each page has its own link, pages simply fade in ---------- */
+  var TITLES = {
+    home: "Harry O'Hagin – Maker portfolio",
+    projects: "Projects – Harry O'Hagin",
+    power8board: "Power8Board – Harry O'Hagin",
+    superhat: "SuperHAT – Harry O'Hagin",
+    floats: "Float – Harry O'Hagin",
+    medals: "PCB Medals – Harry O'Hagin",
+    about: "Bio – Harry O'Hagin"
+  };
+  var DETAIL = { power8board: 1, superhat: 1, floats: 1, medals: 1 };
+
+  function keyFromHash() {
+    var h = location.hash.replace(/^#\/?/, '').replace(/\/$/, '');
+    if (h === '' ) return 'home';
+    if (h === 'projects') return 'projects';
+    if (h === 'about') return 'about';
+    if (h.indexOf('projects/') === 0) {
+      var k = h.slice(9);
+      return DETAIL[k] ? k : 'projects';
+    }
+    return 'home';
+  }
+
+  function show(key) {
+    var views = document.querySelectorAll('.view');
+    for (var i = 0; i < views.length; i++) views[i].hidden = (views[i].id !== 'view-' + key);
+    var el = document.getElementById('view-' + key);
+    document.title = TITLES[key];
+    window.scrollTo(0, 0);
+    el.classList.remove('enter');
+    void el.offsetWidth;
+    el.classList.add('enter');
+    if (key === 'home') {
+      homeEnter();
+    } else {
+      var h1 = el.querySelector('h1');
+      if (h1) { h1.setAttribute('tabindex', '-1'); h1.focus({ preventScroll: true }); }
+    }
+  }
+
+  /* ---------- splash ---------- */
+  function wPx() { return seal.offsetWidth; }
+  function hPx() { return seal.offsetHeight; }
+  function place(x, y, rad) {
+    arrow.style.transform = 'translate(' + x + 'px,' + y + 'px) rotate(' + rad + 'rad)';
+  }
+  function startX() { return -(wPx() / 2 + 22 + 23); }
+  function placeIdle() { arrow.style.display = ''; place(startX(), 0, 0); }
+
+  function markReady(instant) {
+    if (instant) seal.classList.add('instant');
+    seal.classList.remove('intro', 'going');
+    seal.classList.add('split', 'ready');
+    arrow.style.display = 'none';
+    halfL.removeAttribute('aria-hidden'); halfL.removeAttribute('tabindex');
+    halfR.removeAttribute('aria-hidden'); halfR.removeAttribute('tabindex');
+    introDone = true;
+    animating = false;
+    if (instant) requestAnimationFrame(function () { requestAnimationFrame(function () { seal.classList.remove('instant'); }); });
+  }
+
+  function homeEnter() {
+    if (introDone) return;
+    if (reduceQuery.matches) { markReady(true); return; }
+    placeIdle();
+  }
+
+  // One continuous swoop: down and around the bottom while the arrow keeps turning
+  // to face the box, then straight up through the middle without stopping.
+  function buildPath() {
+    var H = hPx();
+    var sx = startX();
+    var p3y = H / 2 + 50;
+    var D = H / 2 + 145;
+    var P0 = [sx, 0], C1 = [sx, D * 0.7], C2 = [0, D], P3 = [0, p3y];
+    var N = 90, pts = [], lens = [0], i, t, u;
+    for (i = 0; i <= N; i++) {
+      t = i / N; u = 1 - t;
+      pts.push([
+        u*u*u*P0[0] + 3*u*u*t*C1[0] + 3*u*t*t*C2[0] + t*t*t*P3[0],
+        u*u*u*P0[1] + 3*u*u*t*C1[1] + 3*u*t*t*C2[1] + t*t*t*P3[1]
+      ]);
+      if (i > 0) lens.push(lens[i - 1] + Math.hypot(pts[i][0] - pts[i-1][0], pts[i][1] - pts[i-1][1]));
+    }
+    var L1 = lens[N];
+    var topDist = seal.getBoundingClientRect().top + H / 2 + 90;
+    var L2 = p3y + topDist;
+    return {
+      L1: L1, len: L1 + L2,
+      at: function (d) {
+        if (d >= L1) return { x: 0, y: p3y - (d - L1), a: -Math.PI / 2, phase: 2 };
+        var k = 1;
+        while (k < N && lens[k] < d) k++;
+        var f = (d - lens[k - 1]) / ((lens[k] - lens[k - 1]) || 1);
+        var x = pts[k-1][0] + (pts[k][0] - pts[k-1][0]) * f;
+        var y = pts[k-1][1] + (pts[k][1] - pts[k-1][1]) * f;
+        return { x: x, y: y, a: Math.atan2(-y, -x), phase: 1 };
+      }
+    };
+  }
+
+  function skip() {
+    if (!animating) return;
+    seal.classList.add('instant');
+    markReady(false);
+    requestAnimationFrame(function () { requestAnimationFrame(function () { seal.classList.remove('instant'); }); });
+  }
+
+  function run() {
+    if (animating || introDone) return;
+    animating = true;
+    seal.classList.remove('intro');
+    seal.classList.add('going');
+    var path = buildPath();
+    var total = 1350;
+    var t0 = performance.now();
+    var splitDone = false;
+    stage.addEventListener('pointerdown', skip, { once: true });
+
+    function frame() {
+      if (!animating) return;
+      var tau = Math.min(1, (performance.now() - t0) / total);
+      var e = 0.1 * tau + 0.9 * tau * tau * tau;
+      var p = path.at(e * path.len);
+      place(p.x, p.y, p.a);
+      if (!splitDone && p.phase === 2 && p.y <= 22) { splitDone = true; seal.classList.add('split'); }
+      if (tau < 1) { requestAnimationFrame(frame); return; }
+      markReady(false);
+      stage.removeEventListener('pointerdown', skip);
+      halfL.focus({ preventScroll: true });
+    }
+    requestAnimationFrame(frame);
+  }
+
+  hit.addEventListener('click', run);
+  window.addEventListener('resize', function () {
+    if (!animating && !introDone && !document.getElementById('view-home').hidden) placeIdle();
+  });
+
+  /* ---------- click-through viewers ---------- */
+  function Viewer(root) {
+    var slides = Array.prototype.slice.call(root.querySelectorAll('.slide'));
+    var frame = root.querySelector('.v-frame');
+    var caption = root.querySelector('.v-caption');
+    var count = root.querySelector('.v-count');
+    var openLink = root.querySelector('.v-open');
+    var dotsBox = root.querySelector('.v-dots');
+    var i = 0;
+    var api = {
+      image: function () { return slides[i].querySelector('img'); },
+      caption: function () { return slides[i].getAttribute('data-caption'); },
+      position: function () { return (i + 1) + ' / ' + slides.length; },
+      step: function (d) { go(i + d, true); }
+    };
+    slides.forEach(function (s) { s.querySelector('img').draggable = false; });
+    var dots = slides.map(function (s, k) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'v-dot';
+      b.setAttribute('aria-label', 'Show image ' + (k + 1) + ' of ' + slides.length);
+      b.addEventListener('click', function () { go(k, true); });
+      dotsBox.appendChild(b);
+      return b;
+    });
+    function imgAt(k) { return slides[(k + slides.length) % slides.length].querySelector('img'); }
+    function go(n, byUser) {
+      i = (n + slides.length) % slides.length;
+      slides.forEach(function (s, k) { s.hidden = (k !== i); });
+      dots.forEach(function (d, k) { if (k === i) d.setAttribute('aria-current', 'true'); else d.removeAttribute('aria-current'); });
+      caption.textContent = api.caption();
+      count.textContent = api.position();
+      openLink.href = api.image().getAttribute('src');
+      // Only start fetching the neighbouring images once someone is actually browsing.
+      if (byUser) { imgAt(i + 1).loading = 'eager'; imgAt(i - 1).loading = 'eager'; }
+    }
+    root.querySelector('.prev').addEventListener('click', function () { go(i - 1, true); });
+    root.querySelector('.next').addEventListener('click', function () { go(i + 1, true); });
+    root.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowLeft') { go(i - 1, true); e.preventDefault(); }
+      if (e.key === 'ArrowRight') { go(i + 1, true); e.preventDefault(); }
+    });
+    // swipe on touch screens
+    var x0 = null, y0 = 0;
+    frame.addEventListener('pointerdown', function (e) { x0 = e.clientX; y0 = e.clientY; });
+    frame.addEventListener('pointerup', function (e) {
+      if (x0 === null) return;
+      var dx = e.clientX - x0, dy = e.clientY - y0;
+      x0 = null;
+      if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) go(i + (dx < 0 ? 1 : -1), true);
+    });
+    go(0, false);
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('[data-viewer]'), Viewer);
+
+  /* ---------- big GIFs load only when asked for ---------- */
+  Array.prototype.forEach.call(document.querySelectorAll('[data-gif]'), function (fig) {
+    var img = fig.querySelector('img'), btn = fig.querySelector('.play');
+    var gif = fig.getAttribute('data-gif'), still = img.getAttribute('src');
+    var label = 'Play animation', playing = false, busy = false;
+    btn.addEventListener('click', function () {
+      if (busy) return;
+      if (playing) { img.src = still; playing = false; btn.textContent = label; return; }
+      busy = true; btn.textContent = 'Loading…';
+      var pre = new Image();
+      pre.onload = function () { img.src = gif; playing = true; busy = false; btn.textContent = 'Pause'; };
+      pre.onerror = function () { busy = false; btn.textContent = label; };
+      pre.src = gif;
+    });
+  });
+
+  /* ---------- reduced motion: show a still with a Play button instead of an auto-looping GIF ---------- */
+  if (reduceQuery.matches) {
+    Array.prototype.forEach.call(document.querySelectorAll('img.anim'), function (img) {
+      var gif = img.getAttribute('src'), still = img.getAttribute('data-still');
+      if (!still) return;
+      img.src = still;
+      var btn = document.createElement('button');
+      btn.className = 'play'; btn.type = 'button'; btn.textContent = 'Play animation';
+      var playing = false;
+      btn.addEventListener('click', function () {
+        playing = !playing;
+        img.src = playing ? gif : still;
+        btn.textContent = playing ? 'Pause' : 'Play animation';
+      });
+      img.parentNode.appendChild(btn);
+    });
+  }
+
+  window.addEventListener('hashchange', function () { show(keyFromHash()); });
+  show(keyFromHash());
+})();
+</script>
+</body>
+</html>
